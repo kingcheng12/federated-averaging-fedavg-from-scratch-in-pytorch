@@ -117,8 +117,24 @@ def count_client_samples(client_partitions):
 
     return [len(client[1]) for client in client_partitions]
 
-# Step 7 - iterate_client_batches (not yet solved)
-# TODO: implement
+# Step 7 - iterate_client_batches
+def iterate_client_batches(client_features, client_labels, batch_size, seed):
+    # TODO: shuffle one client's data with the seed and slice it into batches of size B
+
+    # shuffle
+    n = client_features.shape[0]
+    generator = torch.Generator().manual_seed(seed)
+    shuffled_indices = torch.randperm(n, generator=generator)
+
+    shuffled_features = client_features[shuffled_indices]
+    shuffled_labels = client_labels[shuffled_indices]
+
+    # batch
+    feature_batches = torch.split(shuffled_features, batch_size)
+    label_batches = torch.split(shuffled_labels, batch_size)
+
+
+    return list(zip(feature_batches, label_batches))
 
 # Step 8 - compute_batch_loss (not yet solved)
 # TODO: implement
