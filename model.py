@@ -60,8 +60,32 @@ def train_test_split_dataset(features, labels, test_fraction, seed):
 
     return train_features, train_labels, test_features, test_labels
 
-# Step 4 - partition_data_iid (not yet solved)
-# TODO: implement
+# Step 4 - partition_data_iid
+import torch
+
+def partition_data_iid(train_features, train_labels, num_clients, seed):
+    # TODO: Shuffle the M rows with seed and split them evenly across num_clients clients.
+    if num_clients <= 0:
+        num_clients = 1
+        
+    # shuffle
+    n = train_features.shape[0]
+    generator = torch.Generator().manual_seed(seed)
+    shuffled_indices = torch.randperm(n, generator=generator)
+
+    client_index_splits = torch.tensor_split(
+        shuffled_indices,
+        num_clients,
+    )
+
+    out = []
+    for client_idx in client_index_splits:
+        client_feature = train_features[client_idx]
+        client_label = train_labels[client_idx]
+
+        out.append((client_feature, client_label))
+    
+    return out
 
 # Step 5 - partition_data_non_iid (not yet solved)
 # TODO: implement
