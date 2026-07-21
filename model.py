@@ -418,8 +418,6 @@ def train_centralized_baseline(train_features, train_labels, test_features, test
     learning_rate = float(learning_rate)
     seed = int(seed)
 
-    accuracy_history = []
-
     model = build_mlp_classifier(
         input_size,
         hidden_size,
