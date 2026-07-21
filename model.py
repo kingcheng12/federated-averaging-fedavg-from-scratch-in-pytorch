@@ -508,8 +508,14 @@ def run_fedavg_non_iid(train_features, train_labels, test_features, test_labels,
 
     return model, accuracy_history
 
-# Step 24 - compute_non_iid_gap (not yet solved)
-# TODO: implement
+# Step 24 - compute_non_iid_gap
+def compute_non_iid_gap(iid_accuracies, non_iid_accuracies):
+    # TODO: read the final accuracy from each curve and return iid_final, non_iid_final, gap
+    
+    return {'iid_final': iid_accuracies[-1],
+            'non_iid_final': non_iid_accuracies[-1],
+            'gap': iid_accuracies[-1] - non_iid_accuracies[-1]
+            }
 
 # Step 25 - rounds_to_target_vs_local_epochs (not yet solved)
 # TODO: implement
