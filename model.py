@@ -107,22 +107,45 @@ def partition_data_non_iid(train_features, train_labels, num_clients, shards_per
     if num_clients <= 0:
         num_clients = 1
     
+    num_shards = num_clients * shards_per_client
+
     # sort
     sorted_indices = torch.argsort(train_labels)
 
-    client_index_splits = torch.tensor_split(
+    index_shards = torch.tensor_split(
         sorted_indices,
-        num_clients,
+        num_shards,
     )
 
-    out = []
-    for client_idx in client_index_splits:
-        client_feature = train_features[client_idx]
-        client_label = train_labels[client_idx]
+    generator = torch.Generator()
+    generator.manual_seed(seed)
 
-        out.append((client_feature, client_label))
-    
-    return out
+    shuffled_shard_ids = torch.multinomial(
+        torch.ones(num_shards),
+        num_samples=num_shards,
+        replacement=False,
+        generator=generator,
+    )
+
+    client_partitions = []
+
+    for client_index in range(num_clients):
+        start = client_index * shards_per_client
+        end = start + shards_per_client
+
+        client_shard_ids = shuffled_shard_ids[start:end]
+
+        client_indices = torch.cat([
+            index_shards[int(shard_id)]
+            for shard_id in client_shard_ids
+        ])
+
+        client_partitions.append((
+            train_features[client_indices],
+            train_labels[client_indices],
+        ))
+
+    return client_partitions
 
 # Step 6 - count_client_samples
 def count_client_samples(client_partitions):
@@ -467,8 +490,23 @@ def run_fedavg_iid(train_features, train_labels, test_features, test_labels, mod
 
     return accuracy_history
 
-# Step 23 - run_fedavg_non_iid (not yet solved)
-# TODO: implement
+# Step 23 - run_fedavg_non_iid
+def run_fedavg_non_iid(train_features, train_labels, test_features, test_labels, model_config, num_clients, shards_per_client, num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed):
+    # TODO: partition data non-IID across clients, then run the full FedAvg loop
+    client_partitions = partition_data_non_iid(train_features, train_labels, num_clients, shards_per_client, seed)
+
+    model, accuracy_history = run_fedavg(client_partitions, 
+                                        test_features, 
+                                        test_labels, 
+                                        model_config,
+                                        num_rounds,
+                                        client_fraction,
+                                        local_epochs,
+                                        batch_size,
+                                        learning_rate,
+                                        seed)
+
+    return model, accuracy_history
 
 # Step 24 - compute_non_iid_gap (not yet solved)
 # TODO: implement
