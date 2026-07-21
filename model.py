@@ -339,7 +339,7 @@ def evaluate_accuracy(model, test_features, test_labels):
 
         accuracy = (predictions == test_labels).float().mean()
 
-    return accuracy
+    return accuracy.item()
 
 # Step 20 - run_fedavg
 def run_fedavg(client_partitions, test_features, test_labels, model_config, num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed):
