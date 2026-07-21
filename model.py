@@ -271,8 +271,28 @@ def select_round_clients(num_clients, client_fraction, seed):
 
     return torch.sort(selected_clients).values.tolist()
 
-# Step 18 - run_communication_round (not yet solved)
-# TODO: implement
+# Step 18 - run_communication_round
+def run_communication_round(global_state, client_partitions, selected_clients, model_config, local_epochs, batch_size, learning_rate, seed):
+    # TODO: train each selected client from the global state, then weighted-average their states
+    input_size = model_config['input_size']
+    hidden_size = model_config['hidden_size']
+    num_classes = model_config['num_classes']
+
+    client_states = []
+    client_sample_counts = []
+    for client in selected_clients:
+        partition = client_partitions[client]
+        model = build_mlp_classifier(input_size, hidden_size, num_classes)
+        model = load_model_state(model, global_state)
+
+        client_features, client_labels = partition
+
+        train_state = train_client_local(model, client_features, client_labels, local_epochs, batch_size, learning_rate, seed+client)
+
+        client_states.append(train_state)
+        client_sample_counts.append(len(client_labels))
+
+    return aggregate_weighted_average(client_states, client_sample_counts)
 
 # Step 19 - evaluate_accuracy (not yet solved)
 # TODO: implement
