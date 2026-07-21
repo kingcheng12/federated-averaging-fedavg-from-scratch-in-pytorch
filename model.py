@@ -224,8 +224,11 @@ def initialize_global_state(input_size, hidden_size, num_classes, seed):
 
     return clone_model_state(model)
 
-# Step 14 - add_state_dicts (not yet solved)
-# TODO: implement
+# Step 14 - add_state_dicts
+def add_state_dicts(state_a, state_b):
+    # TODO: return a new state dict with elementwise sums per matching key
+
+    return {name: state_a[name] + state_b[name] for name in state_a.keys()}
 
 # Step 15 - scale_state_dict (not yet solved)
 # TODO: implement
