@@ -203,8 +203,13 @@ def clone_model_state(model):
 
     return {name: tensor.detach().clone() for name, tensor in model.state_dict().items()}
 
-# Step 12 - load_model_state (not yet solved)
-# TODO: implement
+# Step 12 - load_model_state
+def load_model_state(model, state_dict):
+    # TODO: Load a state dict of parameters back into a model.
+
+    result = model.load_state_dict(state_dict, strict=False)
+
+    return model
 
 # Step 13 - initialize_global_state (not yet solved)
 # TODO: implement
