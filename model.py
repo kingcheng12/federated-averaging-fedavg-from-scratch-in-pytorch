@@ -262,6 +262,9 @@ def aggregate_weighted_average(client_states, client_sample_counts):
 # Step 17 - select_round_clients
 def select_round_clients(num_clients, client_fraction, seed):
     # TODO: pick max(1, round(client_fraction*num_clients)) distinct client indices
+    if isinstance(client_fraction, torch.Tensor):
+        client_fraction = client_fraction.item()
+        
     num_selected = max(
         1,
         round(client_fraction * num_clients),
@@ -344,6 +347,7 @@ def run_fedavg(client_partitions, test_features, test_labels, model_config, num_
         model = build_mlp_classifier(input_size, hidden_size, num_classes)
         model = load_model_state(model, global_state)
         accuracy.append(evaluate_accuracy(model, test_features, test_labels))
+        
     model = build_mlp_classifier(input_size, hidden_size, num_classes)
     model = load_model_state(model, global_state)
 
