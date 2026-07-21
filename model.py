@@ -287,9 +287,9 @@ def select_round_clients(num_clients, client_fraction, seed):
 # Step 18 - run_communication_round
 def run_communication_round(global_state, client_partitions, selected_clients, model_config, local_epochs, batch_size, learning_rate, seed):
     # TODO: train each selected client from the global state, then weighted-average their states
-    input_size = model_config['input_size']
-    hidden_size = model_config['hidden_size']
-    num_classes = model_config['num_classes']
+    input_size = int(model_config["input_size"])
+    hidden_size = int(model_config["hidden_size"])
+    num_classes = int(model_config["num_classes"])
 
     client_states = []
     client_sample_counts = []
@@ -324,9 +324,9 @@ def evaluate_accuracy(model, test_features, test_labels):
 # Step 20 - run_fedavg
 def run_fedavg(client_partitions, test_features, test_labels, model_config, num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed):
     # TODO: init global state, then loop rounds: select clients, run round, evaluate.
-    input_size = model_config['input_size']
-    hidden_size = model_config['hidden_size']
-    num_classes = model_config['num_classes']
+    input_size = int(model_config["input_size"])
+    hidden_size = int(model_config["hidden_size"])
+    num_classes = int(model_config["num_classes"])
     num_clients = len(client_partitions)
 
     global_state = initialize_global_state(input_size, hidden_size, num_classes, seed)
