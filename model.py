@@ -539,6 +539,23 @@ def rounds_to_target_vs_local_epochs(client_partitions, test_features, test_labe
     
     return epoch_accu
 
-# Step 26 - accuracy_vs_client_fraction (not yet solved)
-# TODO: implement
+# Step 26 - accuracy_vs_client_fraction
+def accuracy_vs_client_fraction(client_partitions, test_features, test_labels, model_config, client_fraction_list, num_rounds, local_epochs, batch_size, learning_rate, seed):
+    # TODO: for each fraction, run FedAvg and record the final test accuracy
+    frac_accu = {}
+    for client_fraction in client_fraction_list:
+        model, accuracy_history = run_fedavg(client_partitions, 
+                                    test_features, 
+                                    test_labels, 
+                                    model_config, 
+                                    num_rounds, 
+                                    client_fraction, 
+                                    local_epochs, 
+                                    batch_size, 
+                                    learning_rate, 
+                                    seed)
+        
+        frac_accu[client_fraction] = accuracy_history[-1]
+    
+    return frac_accu
 
