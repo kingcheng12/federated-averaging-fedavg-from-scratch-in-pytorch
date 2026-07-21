@@ -9,17 +9,27 @@ import numpy as np
 # Step 1 - build_mlp_classifier
 import torch
 import torch.nn as nn
-from collections import OrderedDict
+
+class _MLPClassifier(nn.Module):
+    def __init__(self, input_size, hidden_size, num_classes):
+        super().__init__()
+
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        return self.fc2(x)
 
 
 def build_mlp_classifier(input_size, hidden_size, num_classes):
     # TODO: return an nn.Module mapping (N, input_size) floats to (N, num_classes) logits
-    return nn.Sequential(
-        OrderedDict([
-            ("fc1", nn.Linear(input_size, hidden_size)),
-            ("relu", nn.ReLU()),
-            ("fc2", nn.Linear(hidden_size, num_classes)),
-        ])
+    return _MLPClassifier(
+        input_size,
+        hidden_size,
+        num_classes,
     )
 
 # Step 2 - build_synthetic_dataset
@@ -308,8 +318,36 @@ def evaluate_accuracy(model, test_features, test_labels):
 
     return accuracy
 
-# Step 20 - run_fedavg (not yet solved)
-# TODO: implement
+# Step 20 - run_fedavg
+def run_fedavg(client_partitions, test_features, test_labels, model_config, num_rounds, client_fraction, local_epochs, batch_size, learning_rate, seed):
+    # TODO: init global state, then loop rounds: select clients, run round, evaluate.
+    input_size = model_config['input_size']
+    hidden_size = model_config['hidden_size']
+    num_classes = model_config['num_classes']
+    num_clients = len(client_partitions)
+
+    global_state = initialize_global_state(input_size, hidden_size, num_classes, seed)
+    accuracy = []
+
+    for r in range(num_rounds):
+        selected_clients = select_round_clients(num_clients, client_fraction, seed+r)
+        global_state = run_communication_round(
+            global_state,
+            client_partitions,
+            selected_clients,
+            model_config,
+            local_epochs, 
+            batch_size, 
+            learning_rate, 
+            seed+r
+        )
+        model = build_mlp_classifier(input_size, hidden_size, num_classes)
+        model = load_model_state(model, global_state)
+        accuracy.append(evaluate_accuracy(model, test_features, test_labels))
+    model = build_mlp_classifier(input_size, hidden_size, num_classes)
+    model = load_model_state(model, global_state)
+
+    return model, accuracy
 
 # Step 21 - train_centralized_baseline (not yet solved)
 # TODO: implement
