@@ -260,23 +260,26 @@ def aggregate_weighted_average(client_states, client_sample_counts):
     return avg_states
 
 # Step 17 - select_round_clients
+import builtins
+import torch
+
 def select_round_clients(num_clients, client_fraction, seed):
     # TODO: pick max(1, round(client_fraction*num_clients)) distinct client indices
-    if isinstance(client_fraction, torch.Tensor):
-        client_fraction = client_fraction.item()
-        
+    num_clients = int(num_clients)
+    client_fraction = float(client_fraction)
+    seed = int(seed)
+
     num_selected = max(
         1,
-        round(client_fraction * num_clients),
+        builtins.round(client_fraction * num_clients),
     )
+    num_selected = min(num_selected, num_clients)
 
     generator = torch.Generator()
     generator.manual_seed(seed)
 
-    weights = torch.ones(num_clients)
-
     selected_clients = torch.multinomial(
-        weights,
+        torch.ones(num_clients),
         num_samples=num_selected,
         replacement=False,
         generator=generator,
