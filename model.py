@@ -347,7 +347,7 @@ def run_fedavg(client_partitions, test_features, test_labels, model_config, num_
         model = build_mlp_classifier(input_size, hidden_size, num_classes)
         model = load_model_state(model, global_state)
         accuracy.append(evaluate_accuracy(model, test_features, test_labels))
-        
+
     model = build_mlp_classifier(input_size, hidden_size, num_classes)
     model = load_model_state(model, global_state)
 
