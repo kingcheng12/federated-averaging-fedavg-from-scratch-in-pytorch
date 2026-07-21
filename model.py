@@ -236,8 +236,18 @@ def scale_state_dict(state_dict, weight):
 
     return {name: state*weight for name, state in state_dict.items()}
 
-# Step 16 - aggregate_weighted_average (not yet solved)
-# TODO: implement
+# Step 16 - aggregate_weighted_average
+from functools import reduce
+
+def aggregate_weighted_average(client_states, client_sample_counts):
+    # TODO: combine client state dicts into a sample-weighted FedAvg average
+
+    total_sample = sum(client_sample_counts)
+    scaled_states = [scale_state_dict(states, count/total_sample) for states, count in zip(client_states, client_sample_counts)]
+
+    avg_states = reduce(add_state_dicts, scaled_states)
+
+    return avg_states
 
 # Step 17 - select_round_clients (not yet solved)
 # TODO: implement
