@@ -230,8 +230,11 @@ def add_state_dicts(state_a, state_b):
 
     return {name: state_a[name] + state_b[name] for name in state_a.keys()}
 
-# Step 15 - scale_state_dict (not yet solved)
-# TODO: implement
+# Step 15 - scale_state_dict
+def scale_state_dict(state_dict, weight):
+    # TODO: return a new state dict with each tensor multiplied by weight
+
+    return {name: state*weight for name, state in state_dict.items()}
 
 # Step 16 - aggregate_weighted_average (not yet solved)
 # TODO: implement
