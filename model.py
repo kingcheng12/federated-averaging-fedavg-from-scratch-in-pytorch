@@ -294,8 +294,19 @@ def run_communication_round(global_state, client_partitions, selected_clients, m
 
     return aggregate_weighted_average(client_states, client_sample_counts)
 
-# Step 19 - evaluate_accuracy (not yet solved)
-# TODO: implement
+# Step 19 - evaluate_accuracy
+def evaluate_accuracy(model, test_features, test_labels):
+    # TODO: run a no-grad forward pass and return the fraction of correct argmax predictions
+
+    model.eval()
+
+    with torch.no_grad():
+        logits = model(test_features)
+        predictions = torch.argmax(logits, dim=-1)
+
+        accuracy = (predictions == test_labels).float().mean()
+
+    return accuracy
 
 # Step 20 - run_fedavg (not yet solved)
 # TODO: implement
