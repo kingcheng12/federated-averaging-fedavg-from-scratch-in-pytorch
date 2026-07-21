@@ -296,19 +296,36 @@ def run_communication_round(global_state, client_partitions, selected_clients, m
 
     client_states = []
     client_sample_counts = []
+
     for client in selected_clients:
-        partition = client_partitions[client]
-        model = build_mlp_classifier(input_size, hidden_size, num_classes)
-        model = load_model_state(model, global_state)
+        client_index = int(client)
 
-        client_features, client_labels = partition
+        client_features, client_labels = client_partitions[client_index]
 
-        train_state = train_client_local(model, client_features, client_labels, local_epochs, batch_size, learning_rate, seed+client)
+        model = build_mlp_classifier(
+            input_size,
+            hidden_size,
+            num_classes,
+        )
+        load_model_state(model, global_state)
 
-        client_states.append(train_state)
-        client_sample_counts.append(len(client_labels))
+        local_state = train_client_local(
+            model,
+            client_features,
+            client_labels,
+            int(local_epochs),
+            int(batch_size),
+            float(learning_rate),
+            int(seed) + client_index,
+        )
 
-    return aggregate_weighted_average(client_states, client_sample_counts)
+        client_states.append(local_state)
+        client_sample_counts.append(client_labels.shape[0])
+
+    return aggregate_weighted_average(
+        client_states,
+        client_sample_counts,
+    )
 
 # Step 19 - evaluate_accuracy
 def evaluate_accuracy(model, test_features, test_labels):
@@ -330,31 +347,64 @@ def run_fedavg(client_partitions, test_features, test_labels, model_config, num_
     input_size = int(model_config["input_size"])
     hidden_size = int(model_config["hidden_size"])
     num_classes = int(model_config["num_classes"])
+
+    num_rounds = int(num_rounds)
+    client_fraction = float(client_fraction)
+    local_epochs = int(local_epochs)
+    batch_size = int(batch_size)
+    learning_rate = float(learning_rate)
+    seed = int(seed)
+
     num_clients = len(client_partitions)
 
-    global_state = initialize_global_state(input_size, hidden_size, num_classes, seed)
-    accuracy = []
+    global_state = initialize_global_state(
+        input_size,
+        hidden_size,
+        num_classes,
+        seed,
+    )
 
-    for r in range(num_rounds):
-        selected_clients = select_round_clients(num_clients, client_fraction, seed+r)
+    accuracy_history = []
+
+    for round_index in range(num_rounds):
+        round_seed = seed + round_index
+
+        selected_clients = select_round_clients(
+            num_clients,
+            client_fraction,
+            round_seed,
+        )
+
         global_state = run_communication_round(
             global_state,
             client_partitions,
             selected_clients,
             model_config,
-            local_epochs, 
-            batch_size, 
-            learning_rate, 
-            seed+r
+            local_epochs,
+            batch_size,
+            learning_rate,
+            round_seed,
         )
-        model = build_mlp_classifier(input_size, hidden_size, num_classes)
-        model = load_model_state(model, global_state)
-        accuracy.append(evaluate_accuracy(model, test_features, test_labels))
 
-    model = build_mlp_classifier(input_size, hidden_size, num_classes)
-    model = load_model_state(model, global_state)
+        model = build_mlp_classifier(
+            input_size,
+            hidden_size,
+            num_classes,
+        )
+        load_model_state(model, global_state)
 
-    return model, accuracy
+        accuracy_history.append(
+            evaluate_accuracy(model, test_features, test_labels)
+        )
+
+    model = build_mlp_classifier(
+        input_size,
+        hidden_size,
+        num_classes,
+    )
+    load_model_state(model, global_state)
+
+    return model, accuracy_history
 
 # Step 21 - train_centralized_baseline (not yet solved)
 # TODO: implement
